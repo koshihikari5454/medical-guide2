@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ueno-Okachimachi Medical Guide for Visitors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .clinic-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none; /* Add to remove underline from link */
+            color: inherit; /* Add to inherit text color */
+        }
+        .clinic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .language-badge {
+            background-color: #e0f2fe;
+            color: #0c4a6e;
+        }
+        .highlight-badge {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <div id="language-switcher" class="flex justify-center space-x-2 mb-4">
+                <button class="px-4 py-2 text-sm rounded-full font-medium transition-colors" onclick="setLanguage('ja')">日本語</button>
+                <button class="px-4 py-2 text-sm rounded-full font-medium transition-colors" onclick="setLanguage('en')">English</button>
+                <button class="px-4 py-2 text-sm rounded-full font-medium transition-colors" onclick="setLanguage('zh')">简体中文</button>
+                <button class="px-4 py-2 text-sm rounded-full font-medium transition-colors" onclick="setLanguage('ko')">한국어</button>
+            </div>
+            <h1 id="main-title" class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-2 leading-tight"></h1>
+            <p id="subtitle" class="text-lg md:text-xl text-gray-600"></p>
+        </header>
+
+        <div class="mb-8">
+            <h2 id="symptoms-title" class="text-2xl font-bold text-gray-900 mb-4"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-200">
+                    <h3 id="symptom-internal-title" class="font-semibold text-lg text-gray-900 mb-2"></h3>
+                    <p id="symptom-internal-text" class="text-sm text-gray-600"></p>
+                </div>
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-200">
+                    <h3 id="symptom-surgery-title" class="font-semibold text-lg text-gray-900 mb-2"></h3>
+                    <p id="symptom-surgery-text" class="text-sm text-gray-600"></p>
+                </div>
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-200">
+                    <h3 id="symptom-ortho-title" class="font-semibold text-lg text-gray-900 mb-2"></h3>
+                    <p id="symptom-ortho-text" class="text-sm text-gray-600"></p>
+                </div>
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-200">
+                    <h3 id="symptom-ent-title" class="font-semibold text-lg text-gray-900 mb-2"></h3>
+                    <p id="symptom-ent-text" class="text-sm text-gray-600"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h2 id="emergency-title" class="text-2xl font-bold text-gray-900 mb-4"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200 text-center">
+                    <h3 id="hotline-emergency-title" class="font-semibold text-lg text-gray-900 mb-1"></h3>
+                    <!-- スマートフォンから電話をかけるためのリンク -->
+                    <a href="tel:#7119" class="text-4xl font-bold text-red-600 no-underline">#7119</a>
+                    <p id="hotline-emergency-text" class="text-sm text-gray-600 mt-2"></p>
+                </div>
+                <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200 text-center">
+                    <h3 id="hotline-children-title" class="font-semibold text-lg text-gray-900 mb-1"></h3>
+                    <!-- スマートフォンから電話をかけるためのリンク -->
+                    <a href="tel:#8000" class="text-4xl font-bold text-blue-600 no-underline">#8000</a>
+                    <p id="hotline-children-text" class="text-sm text-gray-600 mt-2"></p>
+                </div>
+            </div>
+        </div>
+        
+        <h2 id="clinic-list-title" class="text-2xl font-bold text-gray-900 mb-6"></h2>
+
+        <div id="clinic-list" class="space-y-6">
+            <!-- Clinic cards will be generated here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const clinics = [
+            {
+                name: { ja: "協和医院", en: "Kyowa Clinic", zh: "协和医院", ko: "교와 의원" },
+                specialties: {
+                    ja: ["総合内科", "内科", "消化器内科", "胃腸科", "肝臓内科", "循環器内科", "糖尿病内科", "アレルギー科"],
+                    en: ["General Internal Medicine", "Internal Medicine", "Gastroenterology", "Gastrointestinal", "Hepatology", "Circulatory Medicine", "Diabetology", "Allergy"],
+                    zh: ["综合内科", "内科", "消化内科", "胃肠科", "肝脏内科", "循环内科", "糖尿病内科", "过敏科"],
+                    ko: ["종합내과", "내과", "소화기내과", "위장과", "간장내과", "순환기내과", "당뇨병내과", "알레르기과"]
+                },
+                address: "4F T&T Okachimachi Building, 4-8-5 Taito, Taito-ku, Tokyo 110-0016",
+                phone: "03-3835-0186",
+                languages: ["Japanese", "Chinese"],
+                hours: "9:00-12:00, 13:30-17:30 (Closed on Saturday)",
+                distance: "6 min walk",
+                website: "https://kyo-wa.tokyo.jp/"
+            },
+            {
+                name: { ja: "パーソナルヘルスクリニック", en: "Personal Health Clinic", zh: "个人健康诊所", ko: "개인 헬스 클리닉" },
+                specialties: { ja: ["性感染症内科"], en: ["STD Internal Medicine"], zh: ["性传播疾病内科"], ko: ["성병내과"] },
+                address: "6F Ueno Fuji Building, 3-39-3 Yushima, Bunkyo-ku, Tokyo 113-0034",
+                phone: "03-5817-4415",
+                languages: ["Japanese", "English"],
+                hours: "Mon, Tue, Thu, Fri: 14:30-20:30, Sat: 12:00-15:00 / 16:30-20:00 (Closed on Wed, Sun, and national holidays)",
+                distance: "8 min walk",
+                website: "https://ph-clinic.org/"
+            },
+            {
+                name: { ja: "上野品川歯科・矯正歯科", en: "Ueno Shinagawa Dental Clinic", zh: "上野品川牙科·矫正牙科", ko: "우에노 시나가와 치과·교정치과" },
+                specialties: { ja: ["歯科"], en: ["Dentistry"], zh: ["牙科"], ko: ["치과"] },
+                address: "8F Nishiiri Building, 6-16-21 Ueno, Taito-ku, Tokyo 110-0005",
+                phone: "03-5826-8814",
+                languages: ["Japanese"],
+                hours: "Weekdays: 11:00-20:00, Sat, Sun, Holidays: 10:00-17:00 (Closed on Thursday)",
+                distance: "11 min walk",
+                website: "https://www.uenoshinagawa.com/"
+            },
+            {
+                name: { ja: "大塚診療所", en: "Otsuka Clinic", zh: "大塚诊所", ko: "오쓰카 의원" },
+                specialties: { ja: ["小児科", "内科", "アレルギー科"], en: ["Pediatrics", "Internal Medicine", "Allergy"], zh: ["儿科", "内科", "过敏科"], ko: ["소아과", "내과", "알레르기과"] },
+                address: "3-31-6 Yushima, Bunkyo-ku, Tokyo 113-0034",
+                phone: "03-3831-2294",
+                languages: ["Japanese", "English"],
+                hours: "9:00-12:00, 15:00-18:00 (Closed on Sunday, national holidays, New Year's holidays, and Thurs/Sat afternoon)",
+                distance: "12 min walk",
+                website: "https://www.ohtsukaclinic.com/"
+            },
+            {
+                name: { ja: "マジアン美容クリニック", en: "Magian Beauty Clinic", zh: "Magian美容诊所", ko: "마지안 미용 클리닉" },
+                specialties: { ja: ["美容皮膚科", "美容外科"], en: ["Dermatology (Aesthetic)", "Plastic Surgery (Aesthetic)"], zh: ["美容皮肤科", "美容外科"], ko: ["미용피부과", "미용외과"] },
+                address: "3F Kojima Building, 2-11-10 Ueno, Taito-ku, Tokyo 110-0005",
+                phone: "03-3832-3313",
+                languages: ["Japanese", "Chinese", "Korean"],
+                hours: "10:00-17:00 (Last check-in for first-time visitors is 15:30. Closed on Wed, Sun, and national holidays)",
+                distance: "12 min walk",
+                website: "https://e-abclinic.com/"
+            },
+            {
+                name: { ja: "上野医院", en: "Ueno Clinic", zh: "上野医院", ko: "우에노 의원" },
+                specialties: { ja: ["内科", "皮膚科", "泌尿器科"], en: ["Internal Medicine", "Dermatology", "Urology"], zh: ["内科", "皮肤科", "泌尿科"], ko: ["내과", "피부과", "비뇨기과"] },
+                address: "4F Kojima Building, 2-11-10 Ueno, Taito-ku, Tokyo 110-0005",
+                phone: "03-3832-0076 (General), 03-3832-5576 (Foreigner exclusive)",
+                languages: ["Japanese", "Korean", "English"],
+                hours: "Weekdays: 10:00-13:00 / 15:00-19:30, Sat, Sun, Holidays: 10:00-13:00 / 15:00-18:10 (Closed on Wed, Sun, and national holidays)",
+                distance: "13 min walk",
+                website: "https://www.uenomc.com/"
+            },
+            {
+                name: { ja: "うえの平安医院", en: "Ueno Heian Clinic", zh: "上野平安医院", ko: "우에노 헤이안 의원" },
+                specialties: { ja: ["総合内科"], en: ["General Internal Medicine"], zh: ["综合内科"], ko: ["종합내과"] },
+                address: "2F Nissan Building, 2-20-11 Higashi-Ueno, Taito-ku, Tokyo 110-0005",
+                phone: "03-6803-2908",
+                languages: ["Japanese", "Chinese"],
+                hours: "Mon, Tue, Wed: 9:00-13:00 / 14:00-18:00 (Closed on Thu, Fri, Sat, Sun)",
+                distance: "14 min walk",
+                notes: { ja: "★事前予約制,夜間対応可", en: "Appointment required, Nighttime appointments available", zh: "需要预约，可夜间就诊", ko: "사전 예약 필수, 야간 진료 가능" },
+                website: "https://www.ueno-heian-iin.com/"
+            },
+            {
+                name: { ja: "しのみやクリニック", en: "Shinomiya Clinic", zh: "四宫诊所", ko: "시노미야 클리닉" },
+                specialties: { ja: ["心療内科", "精神科"], en: ["Psychosomatic Medicine", "Psychiatry"], zh: ["身心内科", "精神科"], ko: ["심료내과", "정신과"] },
+                address: "3F Martino Building, 3-37-59 Kanda Sakuma-cho, Chiyoda-ku, Tokyo 101-0025",
+                phone: "03-5687-1516",
+                languages: ["Japanese", "English"],
+                hours: "Weekdays & Sat morning: 10:30-13:30 / 15:00-18:00 (Closed on Sat afternoon and Sunday)",
+                distance: "15 min walk",
+                website: "http://shinomiya-clinic.jp/"
+            },
+            {
+                name: { ja: "東京ビジネスクリニックエキュート上野", en: "Tokyo Business Clinic Ecute Ueno", zh: "东京商务诊所 上野站店", ko: "도쿄 비즈니스 클리닉 에큐트 우에노" },
+                specialties: { ja: ["内科", "外科", "小児科", "自由診療"], en: ["Internal Medicine", "Surgery", "Pediatrics"], zh: ["内科", "外科", "儿科"], ko: ["내과", "외과", "소아과"] },
+                address: "3F Ecute Ueno, 7-1-1 Ueno, Taito-ku, Tokyo 110-0005",
+                phone: "03-6802-8792",
+                languages: ["Japanese", "English", "Chinese"],
+                hours: "Open every day: 9:00-21:00",
+                distance: "16 min walk",
+                website: "https://www.businessclinic.tokyo/ueno"
+            },
+            {
+                name: { ja: "てとあしの血管クリニック東京", en: "Tetoashi no Kekkan Clinic Tokyo", zh: "手脚血管诊所东京", ko: "테토아시 혈관 클리닉 도쿄" },
+                specialties: { ja: ["血管外科または心臓血管外科"], en: ["Vascular Surgery", "Cardiovascular Surgery"], zh: ["血管外科或心血管外科"], ko: ["혈관외과 또는 심혈관외과"] },
+                address: "1F Sotetsu Manseibashi Building, 1-5-10 Kanda Suda-cho, Chiyoda-ku, Tokyo 101-0041",
+                phone: "03-5289-0072",
+                languages: ["Japanese", "English"],
+                hours: "Mon, Tue, Fri: 10:00-12:00 / 14:00-18:00, Wed, Sat: 9:00-12:00 / 14:00-17:00 (Closed on Thu, Sun, and national holidays)",
+                distance: "17 min walk",
+                website: "https://www.avsc-tokyo.info/"
+            },
+            {
+                name: { ja: "医療法人社団 聖水会 小笠原クリニック", en: "Ogasawara Clinic", zh: "小笠原诊所", ko: "오가사와라 클리닉" },
+                specialties: { ja: ["腎臓内科(人工透析専門)"], en: ["Nephrology (Specializing in Hemodialysis)"], zh: ["肾内科(专门从事血液透析)"], ko: ["신장내과(인공투석전문)"] },
+                address: "7-9F Sakashita Building, 2-6 Kanda Suda-cho, Chiyoda-ku, Tokyo 101-0041",
+                phone: "03-3254-1199",
+                languages: ["Japanese", "English"],
+                hours: "Mon, Wed, Fri: 9:00-22:30, Tue, Thu, Sat: 9:00-16:00 (Closed on Sunday)",
+                distance: "18 min walk",
+                website: "https://ogasawara-cl.com/"
+            },
+            {
+                name: { ja: "ストレスケア東京上野駅前クリニック", en: "Stress Care Tokyo Ueno Ekimae Clinic", zh: "压力护理东京上野站前诊所", ko: "스트레스 케어 도쿄 우에노 역전 클리닉" },
+                specialties: { ja: ["思春期精神科", "心療内科"], en: ["Adolescent Psychiatry", "Psychosomatic Medicine"], zh: ["青春期精神科", "身心内科"], ko: ["사춘기 정신과", "심료내과"] },
+                address: "6F Waseda Building, 7-7-7 Ueno, Taito-ku, Tokyo 110-0005",
+                phone: "03-3842-7730",
+                languages: ["Japanese", "English"],
+                hours: "Mon, Tue, Wed, Fri: 12:30-20:00, Sat: 11:00-20:00 (Closed on Thu, Sun, and national holidays)",
+                distance: "18 min walk",
+                website: "https://tokyoueno.com/"
+            },
+            {
+                name: { ja: "小石川インターナショナルクリニック", en: "Koishikawa International Clinic", zh: "小石川国际诊所", ko: "고이시카와 인터내셔널 클리닉" },
+                specialties: { ja: ["内科", "循環器内科"], en: ["Internal Medicine", "Cardiology"], zh: ["内科", "循环内科"], ko: ["내과", "순환기내과"] },
+                address: "2-29-4 Hakusan, Bunkyo-ku, Tokyo 112-0001",
+                phone: "03-6757-2060 (9:30-16:30), 03-6311-5853 (24h House call only)",
+                languages: ["Japanese", "English", "Chinese", "Russian", "Korean", "Thai", "Vietnamese", "Portuguese", "Spanish", "French", "Tagalog", "Sign Language (Japanese) through tablet interpretation"],
+                hours: "Tue, Wed, Thu, Fri: 9:30-12:30 / 13:30-16:30 (Closed on Mon, Sat, Sun, and national holidays)",
+                distance: "12 min by car, 32 min by train, 46 min walk",
+                notes: { ja: "★完全予約制", en: "Appointment required", zh: "完全预约制", ko: "완전 예약제" },
+                website: "https://www.kic.clinic/"
+            },
+            {
+                name: { ja: "アイドリー矯正歯科", en: "Idly Orthodontic Clinic", zh: "Idly矫正牙科", ko: "아이들리 교정치과" },
+                specialties: { ja: ["歯科"], en: ["Dentistry"], zh: ["牙科"], ko: ["치과"] },
+                address: "4A Hanakiku Building, 3-22-4 Uchikanda, Chiyoda-ku, Tokyo 101-0047",
+                phone: "03-6206-4806",
+                languages: ["Japanese", "English", "Spanish"],
+                hours: "Mon, Tue, Wed, Thu, Fri: 11:00-19:00, Sat, Sun, Holidays: 10:00-18:00 (Irregular holidays)",
+                distance: "24 min walk",
+                website: "https://doctorsfile.jp/h/170833/"
+            },
+            {
+                name: { ja: "医療法人社団 アネモス会 荻本医院", en: "Anemos Clinic Ogimoto", zh: "Anemos会 荻本医院", ko: "아네모스회 오기모토 의원" },
+                specialties: { ja: ["心療内科", "精神科", "内科"], en: ["Psychosomatic Medicine", "Psychiatry", "Internal Medicine"], zh: ["身心内科", "精神科", "内科"], ko: ["심료내과", "정신과", "내과"] },
+                address: "4F Yamate Building 3, 2-7-14 Uchikanda, Chiyoda-ku, Tokyo 101-0047",
+                phone: "03-3255-4730",
+                languages: ["Japanese", "English", "French"],
+                hours: "Mon, Tue, Thu, Fri: 12:00-15:30 / 17:30-21:30 (Closed on Wed, Sat, Sun)",
+                distance: "29 min walk",
+                notes: { ja: "★夜間診療あり, 完全予約制21:00~22:30", en: "Nighttime appointments available (21:00-22:30), Appointment required", zh: "可夜间就诊，21:00-22:30为完全预约制", ko: "야간 진료 가능, 21:00-22:30 완전 예약제" },
+                website: "https://www.ogimoto.com/"
+            },
+            {
+                name: { ja: "学校法人 聖路加国際大学 聖路加国際病院", en: "St. Luke's International Hospital", zh: "圣路加国际医院", ko: "성루카 국제병원" },
+                specialties: {
+                    ja: ["内科", "外科", "女性総合診療部", "小児科", "皮膚科", "眼科", "耳鼻咽喉科", "整形外科", "精神科", "脳神経外科", "心血管センター"],
+                    en: ["Internal Medicine", "Surgery", "Women's Clinic", "Pediatrics", "Dermatology", "Ophthalmology", "Otorhinolaryngology", "Orthopedics", "Psychiatry", "Neurosurgery", "Cardiovascular Center"],
+                    zh: ["内科", "外科", "女性综合诊疗部", "儿科", "皮肤科", "眼科", "耳鼻喉科", "整形外科", "精神科", "脑外科", "心血管中心"],
+                    ko: ["내과", "외과", "여성종합진료부", "소아과", "피부과", "안과", "이비인후과", "정형외과", "정신과", "신경외과", "심혈관센터"]
+                },
+                address: "9-1 Akashi-cho, Chuo-ku, Tokyo 104-8560",
+                phone: "03-3541-5151",
+                languages: ["Japanese", "English", "Chinese", "Spanish", "Russian", "Tagalog", "French", "Korean"],
+                hours: "Weekdays: 8:30-17:00 (Closed on Sat, Sun, and national holidays)",
+                distance: "28 min by train",
+                website: "https://hospital.luke.ac.jp/"
+            },
+            {
+                name: { ja: "お茶の水駅前生活習慣病クリニック", en: "Ochanomizu Ekimae Lifestyle Disease Clinic", zh: "御茶水站前生活习惯病诊所", ko: "오차노미즈 역 앞 생활습관병 클리닉" },
+                specialties: { ja: ["内科", "循環器内科"], en: ["Internal Medicine", "Cardiology"], zh: ["内科", "循环内科"], ko: ["내과", "순환기내과"] },
+                address: "4F Sun Royal, 2-4-4 Kanda Surugadai, Chiyoda-ku, Tokyo 101-0041",
+                phone: "03-3259-1190",
+                languages: ["Japanese"],
+                hours: "Weekdays: 8:00-20:00, Sat: 8:00-13:00, Sun: 9:00-12:00 (Closed on national holidays)",
+                distance: "22 min walk",
+                website: "https://yourstation-clinic.jp/"
+            },
+            {
+                name: { ja: "和田耳鼻科咽喉科", en: "Wada Otorhinolaryngology", zh: "和田耳鼻咽喉科", ko: "와다 이비인후과" },
+                specialties: { ja: ["耳鼻科咽喉科"], en: ["Otorhinolaryngology"], zh: ["耳鼻喉科"], ko: ["이비인후과"] },
+                address: "4F Dai-2 Toei Building, 2-2-9 Kaji-cho, Chiyoda-ku, Tokyo 101-0044",
+                phone: "03-3255-1187",
+                languages: ["Japanese", "English"],
+                hours: "Weekdays: 9:30-13:00 / 14:00-17:00 (Closed on Thu afternoon, Sat, Sun, and national holidays)",
+                distance: "24 min walk",
+                website: "https://byoinnavi.jp/clinic/955"
+            }
+        ];
+        
+        const translations = {
+            ja: {
+                mainTitle: "御徒町エリア 医療機関案内",
+                subtitle: "ホテル周辺の病院を訪日外国人向けに案内します。",
+                symptomsTitle: "症状の目安と診療科",
+                symptomInternalTitle: "内科",
+                symptomInternalText: "風邪、インフルエンザ、発熱、咳、腹痛など、内臓や全身にかかわる一般的な症状。",
+                symptomSurgeryTitle: "外科",
+                symptomSurgeryText: "切り傷、打撲など、血が噴き出すような怪我の場合。",
+                symptomOrthoTitle: "整形外科",
+                symptomOrthoText: "関節の痛みや骨折の可能性がある場合など。",
+                symptomEntTitle: "耳鼻咽喉科",
+                symptomEntText: "のどの痛み、鼻水、耳の不調など、鼻・喉・耳の症状がある場合。",
+                emergencyTitle: "緊急時の対応",
+                hotlineEmergencyTitle: "救急電話相談",
+                hotlineEmergencyText: "緊急の医療アドバイスが必要な場合。",
+                hotlineChildrenTitle: "こども医療電話",
+                hotlineChildrenText: "お子様の健康相談が必要な場合。",
+                clinicListTitle: "医療機関リスト",
+                modalSpecialties: "診療科",
+                modalHours: "診療時間",
+                modalPhone: "電話番号",
+                modalAddress: "住所",
+                modalDistance: "距離",
+            },
+            en: {
+                mainTitle: "Ueno-Okachimachi Medical Guide",
+                subtitle: "Find the right medical clinic for your needs.",
+                symptomsTitle: "Common Symptoms & Clinics",
+                symptomInternalTitle: "Internal Medicine (内科)",
+                symptomInternalText: "For colds, flu, fever, cough, stomach pain, and general ailments.",
+                symptomSurgeryTitle: "Surgery (外科)",
+                symptomSurgeryText: "For cuts, bruises, or bleeding injuries.",
+                symptomOrthoTitle: "Orthopedics (整形外科)",
+                symptomOrthoText: "For joint pain or potential bone fractures.",
+                symptomEntTitle: "Otorhinolaryngology (耳鼻咽喉科)",
+                symptomEntText: "For throat, nose, or ear issues.",
+                emergencyTitle: "Emergency Support",
+                hotlineEmergencyTitle: "Emergency Telephone Consultation",
+                hotlineEmergencyText: "For urgent medical advice.",
+                hotlineChildrenTitle: "Children's Medical Hotline",
+                hotlineChildrenText: "For children's health consultation.",
+                clinicListTitle: "List of Medical Institutions",
+                modalSpecialties: "Specialties",
+                modalHours: "Hours",
+                modalPhone: "Phone",
+                modalAddress: "Address",
+                modalDistance: "Distance from hotel",
+            },
+            zh: {
+                mainTitle: "上野・御徒町医疗指南",
+                subtitle: "为您寻找合适的医疗机构。",
+                symptomsTitle: "常见症状与诊所",
+                symptomInternalTitle: "内科 (Nèikē)",
+                symptomInternalText: "适用于感冒、流感、发烧、咳嗽、腹痛等一般性内脏及全身症状。",
+                symptomSurgeryTitle: "外科 (Wàikē)",
+                symptomSurgeryText: "适用于割伤、瘀伤或出血性损伤。",
+                symptomOrthoTitle: "骨科 (Gǔkē)",
+                symptomOrthoText: "适用于关节疼痛或可能骨折。",
+                symptomEntTitle: "耳鼻喉科 (ěrbíhóu kē)",
+                symptomEntText: "适用于喉咙、鼻子或耳朵问题。",
+                emergencyTitle: "紧急支援",
+                hotlineEmergencyTitle: "紧急电话咨询",
+                hotlineEmergencyText: "需要紧急医疗建议时。",
+                hotlineChildrenTitle: "儿童医疗热线",
+                hotlineChildrenText: "需要儿童健康咨询时。",
+                clinicListTitle: "医疗机构列表",
+                modalSpecialties: "专科",
+                modalHours: "营业时间",
+                modalPhone: "电话",
+                modalAddress: "地址",
+                modalDistance: "距酒店距离",
+            },
+            ko: {
+                mainTitle: "우에노-오카치마치 의료 가이드",
+                subtitle: "필요에 맞는 의료 기관을 찾아보세요.",
+                symptomsTitle: "일반적인 증상 및 진료과",
+                symptomInternalTitle: "내과 (Naegwa)",
+                symptomInternalText: "감기, 독감, 발열, 기침, 복통 등 내장 및 전신 관련 일반적인 증상 및 질병에 해당됩니다.",
+                symptomSurgeryTitle: "외과 (Oegwa)",
+                symptomSurgeryText: "베인 상처, 타박상 또는 출혈이 있는 경우.",
+                symptomOrthoTitle: "정형외과 (Jeonghyeong-oegwa)",
+                symptomOrthoText: "관절 통증 또는 골절 가능성.",
+                symptomEntTitle: "이비인후과 (Ibi-inhugwa)",
+                symptomEntText: "목, 코 또는 귀 문제.",
+                emergencyTitle: "응급 지원",
+                hotlineEmergencyTitle: "응급 전화 상담",
+                hotlineEmergencyText: "긴급 의료 조언이 필요한 경우.",
+                hotlineChildrenTitle: "어린이 의료 핫라인",
+                hotlineChildrenText: "어린이 건강 상담이 필요한 경우.",
+                clinicListTitle: "의료 기관 목록",
+                modalSpecialties: "전문 분야",
+                modalHours: "진료 시간",
+                modalPhone: "전화번호",
+                modalAddress: "주소",
+                modalDistance: "호텔에서 거리",
+            }
+        };
+
+        let currentLang = 'ja';
+        
+        const langButtons = document.querySelectorAll('#language-switcher button');
+        langButtons.forEach(button => {
+            button.classList.add('bg-gray-200', 'text-gray-800');
+        });
+
+        function updateButtonStyles() {
+            langButtons.forEach(button => {
+                if (button.innerText.toLowerCase().startsWith(currentLang)) {
+                    button.classList.remove('bg-gray-200', 'text-gray-800');
+                    button.classList.add('bg-blue-600', 'text-white');
+                } else {
+                    button.classList.remove('bg-blue-600', 'text-white');
+                    button.classList.add('bg-gray-200', 'text-gray-800');
+                }
+            });
+        }
+        
+        const clinicListContainer = document.getElementById('clinic-list');
+
+        // Render static text content
+        function renderStaticText() {
+            document.getElementById('main-title').innerText = translations[currentLang].mainTitle;
+            document.getElementById('subtitle').innerText = translations[currentLang].subtitle;
+            document.getElementById('symptoms-title').innerText = translations[currentLang].symptomsTitle;
+            document.getElementById('symptom-internal-title').innerText = translations[currentLang].symptomInternalTitle;
+            document.getElementById('symptom-internal-text').innerText = translations[currentLang].symptomInternalText;
+            document.getElementById('symptom-surgery-title').innerText = translations[currentLang].symptomSurgeryTitle;
+            document.getElementById('symptom-surgery-text').innerText = translations[currentLang].symptomSurgeryText;
+            document.getElementById('symptom-ortho-title').innerText = translations[currentLang].symptomOrthoTitle;
+            document.getElementById('symptom-ortho-text').innerText = translations[currentLang].symptomOrthoText;
+            document.getElementById('symptom-ent-title').innerText = translations[currentLang].symptomEntTitle;
+            document.getElementById('symptom-ent-text').innerText = translations[currentLang].symptomEntText;
+            document.getElementById('emergency-title').innerText = translations[currentLang].emergencyTitle;
+            document.getElementById('hotline-emergency-title').innerText = translations[currentLang].hotlineEmergencyTitle;
+            document.getElementById('hotline-emergency-text').innerText = translations[currentLang].hotlineEmergencyText;
+            document.getElementById('hotline-children-title').innerText = translations[currentLang].hotlineChildrenTitle;
+            document.getElementById('hotline-children-text').innerText = translations[currentLang].hotlineChildrenText;
+            document.getElementById('clinic-list-title').innerText = translations[currentLang].clinicListTitle;
+            updateButtonStyles();
+        }
+
+        // Render clinic cards as clickable links
+        function renderClinicCards() {
+            clinicListContainer.innerHTML = '';
+            clinics.forEach(clinic => {
+                const link = document.createElement('a');
+                link.href = clinic.website;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer"; // Security best practice
+                link.className = 'clinic-card p-6 rounded-xl shadow-md border border-gray-200 block';
+
+                const clinicName = typeof clinic.name === 'string' ? clinic.name : clinic.name[currentLang] || clinic.name['en'];
+                const specialties = typeof clinic.specialties === 'string' ? clinic.specialties : (clinic.specialties[currentLang] || clinic.specialties['en']).join(', ');
+                const notes = typeof clinic.notes === 'string' ? clinic.notes : (clinic.notes ? clinic.notes[currentLang] || clinic.notes['en'] : '');
+                
+                link.innerHTML = `
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-900 leading-tight mb-2 md:mb-0">${clinicName}</h3>
+                        <p class="text-lg font-semibold text-gray-700 whitespace-nowrap">${clinic.distance}</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${clinic.languages.map(lang => `<span class="badge language-badge">${lang}</span>`).join('')}
+                    </div>
+
+                    <p class="text-sm text-gray-500 mb-2"><strong>${translations[currentLang].modalSpecialties}:</strong> ${specialties}</p>
+                    <p class="text-sm text-gray-500 mb-2"><strong>${translations[currentLang].modalHours}:</strong> ${clinic.hours}</p>
+                    <p class="text-sm text-gray-500 mb-2"><strong>${translations[currentLang].modalPhone}:</strong> ${clinic.phone}</p>
+                    <p class="text-sm text-gray-500 mb-2"><strong>${translations[currentLang].modalAddress}:</strong> ${clinic.address}</p>
+                    ${notes ? `<p class="text-sm text-yellow-800 bg-yellow-100 p-2 rounded-lg font-medium mt-2">${notes}</p>` : ''}
+                `;
+                
+                clinicListContainer.appendChild(link);
+            });
+        }
+        
+        // Language setter
+        function setLanguage(lang) {
+            currentLang = lang;
+            renderStaticText();
+            renderClinicCards();
+        }
+
+        // Initial render
+        window.onload = () => {
+            setLanguage('ja');
+        };
+    </script>
+</body>
+</html>
