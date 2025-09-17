@@ -20,8 +20,8 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
-            text-decoration: none; /* Add to remove underline from link */
-            color: inherit; /* Add to inherit text color */
+            text-decoration: none;
+            color: inherit;
         }
         .clinic-card:hover {
             transform: translateY(-5px);
@@ -211,6 +211,7 @@
                 languages: ["Japanese", "English"],
                 hours: { ja: "月・火・金 10:00~12:00 / 14:00~18:00, 水・土 9:00~12:00 / 14:00~17:00 (木・日・祝日休診日)", en: "Mon, Tue, Fri: 10:00-12:00 / 14:00-18:00, Wed, Sat: 9:00-12:00 / 14:00-17:00 (Closed on Thu, Sun, and national holidays)" },
                 distance: "徒歩17分",
+                notes: { ja: "★完全予約制", en: "Appointment required", zh: "需要预约", ko: "완전 예약제" },
                 website: "https://www.avsc-tokyo.info/"
             },
             {
@@ -222,16 +223,6 @@
                 hours: { ja: "月・水・金 9:00~22:30, 火・木・土 9:00~16:00 (日曜日休診日)", en: "Mon, Wed, Fri: 9:00-22:30, Tue, Thu, Sat: 9:00-16:00 (Closed on Sunday)" },
                 distance: "徒歩18分",
                 website: "https://ogasawara-cl.com/"
-            },
-            {
-                name: { ja: "ストレスケア東京上野駅前クリニック", en: "Stress Care Tokyo Ueno Ekimae Clinic", zh: "压力护理东京上野站前诊所", ko: "스트레스 케어 도쿄 우에노 역전 클리닉" },
-                specialties: { ja: ["思春期精神科", "心療内科"], en: ["Adolescent Psychiatry", "Psychosomatic Medicine"], zh: ["青春期精神科", "身心内科"], ko: ["사춘기 정신과", "심료내과"] },
-                address: { ja: "〒110-0005 東京都台東区上野7-7-7 早稲田ビルヂング6階", en: "6F Waseda Building, 7-7-7 Ueno, Taito-ku, Tokyo 110-0005" },
-                phone: "03-3842-7730",
-                languages: ["Japanese", "English"],
-                hours: { ja: "月・火・水・金 12:30~20:00, 土 11:00~20:00 (木・日・祝日休診日)", en: "Mon, Tue, Wed, Fri: 12:30-20:00, Sat: 11:00-20:00 (Closed on Thu, Sun, and national holidays)" },
-                distance: "徒歩18分",
-                website: "https://tokyoueno.com/"
             },
             {
                 name: { ja: "小石川インターナショナルクリニック", en: "Koishikawa International Clinic", zh: "小石川国际诊所", ko: "고이시카와 인터내셔널 클리닉" },
@@ -249,7 +240,7 @@
                 specialties: { ja: ["歯科"], en: ["Dentistry"], zh: ["牙科"], ko: ["치과"] },
                 address: { ja: "〒101-0047 東京都千代田区内神田3-22-4 花喜久ビル4A", en: "4A Hanakiku Building, 3-22-4 Uchikanda, Chiyoda-ku, Tokyo 101-0047" },
                 phone: "03-6206-4806",
-                languages: ["Japanese", "English", "Spanish"],
+                languages: ["Japanese", "English", "Spanish", "French"],
                 hours: { ja: "月・火・水・木・金　11:00~19:00, 土・日・祝 10:00~18:00 (不定休)", en: "Mon, Tue, Wed, Thu, Fri: 11:00-19:00, Sat, Sun, Holidays: 10:00-18:00 (Irregular holidays)" },
                 distance: "徒歩24分",
                 website: "https://doctorsfile.jp/h/170833/"
@@ -325,7 +316,7 @@
                 modalHours: "診療時間",
                 modalPhone: "電話番号",
                 modalAddress: "住所",
-                modalDistance: "距離",
+                modalDistance: "距離"
             },
             en: {
                 mainTitle: "Ueno-Okachimachi Medical Guide",
@@ -349,7 +340,7 @@
                 modalHours: "Hours",
                 modalPhone: "Phone",
                 modalAddress: "Address",
-                modalDistance: "Distance from hotel",
+                modalDistance: "Distance from hotel"
             },
             zh: {
                 mainTitle: "上野・御徒町医疗指南",
@@ -373,7 +364,7 @@
                 modalHours: "营业时间",
                 modalPhone: "电话",
                 modalAddress: "地址",
-                modalDistance: "距酒店距离",
+                modalDistance: "距酒店距离"
             },
             ko: {
                 mainTitle: "우에노-오카치마치 의료 가이드",
@@ -397,7 +388,7 @@
                 modalHours: "진료 시간",
                 modalPhone: "전화번호",
                 modalAddress: "주소",
-                modalDistance: "호텔에서 거리",
+                modalDistance: "호텔에서 거리"
             }
         };
 
@@ -410,7 +401,9 @@
 
         function updateButtonStyles() {
             langButtons.forEach(button => {
-                if (button.innerText.toLowerCase().startsWith(currentLang)) {
+                const buttonText = button.innerText.toLowerCase();
+                const lang = currentLang === 'ja' ? '日本語' : currentLang === 'en' ? 'english' : currentLang === 'zh' ? '简体中文' : '한국어';
+                if (buttonText.includes(lang.toLowerCase())) {
                     button.classList.remove('bg-gray-200', 'text-gray-800');
                     button.classList.add('bg-blue-600', 'text-white');
                 } else {
@@ -422,7 +415,6 @@
         
         const clinicListContainer = document.getElementById('clinic-list');
 
-        // Render static text content
         function renderStaticText() {
             document.getElementById('main-title').innerText = translations[currentLang].mainTitle;
             document.getElementById('subtitle').innerText = translations[currentLang].subtitle;
@@ -444,21 +436,20 @@
             updateButtonStyles();
         }
 
-        // Render clinic cards as clickable links
         function renderClinicCards() {
             clinicListContainer.innerHTML = '';
             clinics.forEach(clinic => {
                 const link = document.createElement('a');
                 link.href = clinic.website;
                 link.target = "_blank";
-                link.rel = "noopener noreferrer"; // Security best practice
+                link.rel = "noopener noreferrer";
                 link.className = 'clinic-card p-6 rounded-xl shadow-md border border-gray-200 block';
 
-                const clinicName = typeof clinic.name === 'string' ? clinic.name : clinic.name[currentLang] || clinic.name['en'];
-                const specialties = typeof clinic.specialties === 'string' ? clinic.specialties : (clinic.specialties[currentLang] || clinic.specialties['en']).join(', ');
-                const notes = typeof clinic.notes === 'string' ? clinic.notes : (clinic.notes ? clinic.notes[currentLang] || clinic.notes['en'] : '');
-                const address = typeof clinic.address === 'string' ? clinic.address : clinic.address[currentLang] || clinic.address['en'];
-                const hours = typeof clinic.hours === 'string' ? clinic.hours : clinic.hours[currentLang] || clinic.hours['en'];
+                const clinicName = clinic.name[currentLang] || clinic.name['en'];
+                const specialties = (clinic.specialties[currentLang] || clinic.specialties['en']).join(', ');
+                const notes = clinic.notes ? (clinic.notes[currentLang] || clinic.notes['en']) : '';
+                const address = clinic.address[currentLang] || clinic.address['en'];
+                const hours = clinic.hours[currentLang] || clinic.hours['en'];
                 
                 link.innerHTML = `
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
@@ -481,14 +472,12 @@
             });
         }
         
-        // Language setter
         function setLanguage(lang) {
             currentLang = lang;
             renderStaticText();
             renderClinicCards();
         }
 
-        // Initial render
         window.onload = () => {
             setLanguage('ja');
         };
